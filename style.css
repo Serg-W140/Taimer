@@ -1,6 +1,7 @@
 :root {
   --bg: #121212;
   --card: #1e1e1e;
+  --card-alt: #252525;
   --input-bg: #2a2a2a;
   --border: #333333;
   --text: #ffffff;
@@ -23,23 +24,83 @@ body {
   color: var(--text);
   display: flex;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   min-height: 100vh;
 }
 
 .container {
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+}
+
+/* Вкладки навигации */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--card);
+  padding: 5px;
+  border-radius: 14px;
+  gap: 5px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tab-btn.active {
+  background: #333333;
+  color: var(--text);
+}
+
+.tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
+/* Баннер сегодняшней тренировки */
+.today-banner {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.today-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.today-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 /* Табло */
 .display {
   background: var(--card);
   border-radius: 20px;
-  padding: 30px 20px;
+  padding: 24px 18px;
   text-align: center;
   border: 3px solid var(--border);
   transition: border-color 0.3s, box-shadow 0.3s;
@@ -60,16 +121,22 @@ body {
   box-shadow: 0 0 25px rgba(255, 179, 0, 0.2);
 }
 
+.exercise-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
 .status {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin-bottom: 8px;
 }
 
 .time {
-  font-size: 5rem;
+  font-size: 4.8rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -77,8 +144,15 @@ body {
 }
 
 .round-info {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
+}
+
+.next-info {
+  font-size: 0.85rem;
+  color: #888888;
+  margin-top: 6px;
+  min-height: 1.1em;
 }
 
 /* Кнопки */
@@ -89,18 +163,14 @@ body {
   gap: 10px;
 }
 
-.presets {
-  gap: 8px;
-}
-
 .btn {
-  padding: 14px;
+  padding: 13px;
   border: none;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
+  transition: transform 0.15s, border-color 0.2s;
   color: var(--text);
 }
 
@@ -108,18 +178,21 @@ body {
   transform: scale(0.97);
 }
 
-.btn-start {
-  background: var(--rest);
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  border-radius: 9px;
 }
 
-.btn-pause {
-  background: var(--prep);
-  color: #000000;
+.full-btn {
+  width: 100%;
 }
 
-.btn-reset {
-  background: var(--border);
-}
+.btn-start { background: var(--rest); }
+.btn-pause { background: var(--prep); color: #000000; }
+.btn-reset { background: var(--border); }
+.btn-accent { background: var(--accent); color: #000000; }
+.btn-danger { background: #b71c1c; padding: 6px 10px; font-size: 0.8rem; }
 
 .btn-preset {
   background: #262626;
@@ -132,14 +205,14 @@ body {
   border-color: var(--accent);
 }
 
-/* Настройки */
+/* Блоки настроек и списки */
 .settings {
   background: var(--card);
   border-radius: 16px;
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .settings h2 {
@@ -157,7 +230,7 @@ body {
 }
 
 .row label {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: #dddddd;
 }
 
@@ -168,13 +241,15 @@ body {
 }
 
 input[type="number"],
+input[type="text"],
+input[type="date"],
 select {
   background: var(--input-bg);
   border: 1px solid #444444;
   color: var(--text);
   padding: 8px;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 input[type="number"] {
@@ -182,13 +257,85 @@ input[type="number"] {
   text-align: center;
 }
 
+.full-input {
+  width: 100%;
+}
+
 select {
-  width: 170px;
+  max-width: 195px;
 }
 
 input[type="checkbox"] {
   width: 20px;
   height: 20px;
   accent-color: var(--accent);
-  cursor: pointer;
+}
+
+/* Конструктор шагов */
+.step-adder {
+  background: var(--card-alt);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.grid-3 small {
+  display: block;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+}
+
+.grid-3 input {
+  width: 100%;
+}
+
+.draft-list,
+.workout-list,
+.schedule-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-item {
+  background: var(--card-alt);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.list-item-info small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-xs {
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  border-radius: 7px;
 }

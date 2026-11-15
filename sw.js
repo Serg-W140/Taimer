@@ -1,16 +1,20 @@
 'use strict';
 
-const CACHE_NAME = 'interval-timer-v3';
-const ASSETS = [
+const CACHE_NAME = 'interval-timer-v5';
+const ASSETS = new Array(
   './',
   './index.html',
   './style.css',
-  './app.js',
   './manifest.json',
-  './icon.png'
-];
+  './icon.png',
+  './js/main.js',
+  './js/store.js',
+  './js/sound.js',
+  './js/timer.js',
+  './js/builder.js',
+  './js/schedule.js'
+);
 
-// Установка и кэширование ресурсов
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
@@ -18,7 +22,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Очистка старых версий кэша
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -30,7 +33,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Стратегия Cache First (сначала из кэша, затем из сети)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
