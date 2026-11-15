@@ -1,13 +1,13 @@
 'use strict';
 
-const CACHE_NAME = 'interval-timer-v2';
+const CACHE_NAME = 'interval-timer-v3';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  './icon.svg'
+  './icon.png'
 ];
 
 // Установка и кэширование ресурсов

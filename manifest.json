@@ -3,15 +3,16 @@
   "short_name": "Таймер",
   "description": "Настраиваемый таймер для бокса, табаты и круговых тренировок",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
