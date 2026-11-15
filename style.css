@@ -1,0 +1,194 @@
+:root {
+  --bg: #121212;
+  --card: #1e1e1e;
+  --input-bg: #2a2a2a;
+  --border: #333333;
+  --text: #ffffff;
+  --text-muted: #aaaaaa;
+  --work: #e53935;
+  --rest: #43a047;
+  --prep: #ffb300;
+  --accent: #29b6f6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Табло */
+.display {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  border: 3px solid var(--border);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.display.work {
+  border-color: var(--work);
+  box-shadow: 0 0 25px rgba(229, 57, 53, 0.25);
+}
+
+.display.rest {
+  border-color: var(--rest);
+  box-shadow: 0 0 25px rgba(67, 160, 71, 0.25);
+}
+
+.display.prep {
+  border-color: var(--prep);
+  box-shadow: 0 0 25px rgba(255, 179, 0, 0.2);
+}
+
+.status {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.time {
+  font-size: 5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin: 10px 0;
+}
+
+.round-info {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+/* Кнопки */
+.controls,
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.presets {
+  gap: 8px;
+}
+
+.btn {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
+  color: var(--text);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-start {
+  background: var(--rest);
+}
+
+.btn-pause {
+  background: var(--prep);
+  color: #000000;
+}
+
+.btn-reset {
+  background: var(--border);
+}
+
+.btn-preset {
+  background: #262626;
+  border: 1px solid #3a3a3a;
+  font-size: 0.85rem;
+  padding: 10px;
+}
+
+.btn-preset:hover {
+  border-color: var(--accent);
+}
+
+/* Настройки */
+.settings {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings h2 {
+  font-size: 1rem;
+  color: #bbbbbb;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.row label {
+  font-size: 0.95rem;
+  color: #dddddd;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+input[type="number"],
+select {
+  background: var(--input-bg);
+  border: 1px solid #444444;
+  color: var(--text);
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+input[type="number"] {
+  width: 64px;
+  text-align: center;
+}
+
+select {
+  width: 170px;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
