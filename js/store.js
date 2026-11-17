@@ -126,4 +126,38 @@ export class WorkoutStore {
 
     return workouts.find((w) => w.id === targetId) || null;
   }
+
+    static exportData() {
+    const data = {
+      exercises: this.getExercises(),
+      workouts: this.getWorkouts(),
+      schedule: this.getSchedule()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `timer-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+  }
+
+  static importData(file, onSuccess) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.exercises) localStorage.setItem(this.KEYS.EXERCISES, JSON.stringify(data.exercises));
+        if (data.workouts) this.saveWorkouts(data.workouts);
+        if (data.schedule) this.saveSchedule(data.schedule);
+        onSuccess();
+      } catch (err) {
+        alert('Ошибка: повреждённый или неверный файл.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
 }
