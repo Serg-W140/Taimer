@@ -219,7 +219,20 @@
         </div>
       </div>
 
+      <div class="row">
+        <label for="workoutTime">Время начала</label>
+        <input type="time" id="workoutTime" value="19:00">
+      </div>
+      <div class="row">
+        <label for="remindBefore">Напомнить за (мин)</label>
+        <input type="number" id="remindBefore" value="30" min="0" max="1440">
+      </div>
+
+
       <button type="button" class="btn btn-start full-btn" id="saveScheduleBtn">✅ Применить график</button>
+
+      <button type="button" id="addToCalendarBtn" class="btn btn-preset full-btn">📅 Добавить в календарь телефона</button>
+
 
       <div class="settings">
         <h2>Резервная копия и перенос</h2>

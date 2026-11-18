@@ -82,6 +82,8 @@ export class WorkoutStore {
 
     return {
       mode: 'weekly',
+      time: '19:00',
+      remind: 30,
       weekly: {
         1: 'w_base_1',
         2: '',
@@ -160,4 +162,82 @@ export class WorkoutStore {
     reader.readAsText(file);
   }
 
+    static downloadCalendarEvent() {
+    const schedule = this.getSchedule();
+    const workouts = this.getWorkouts();
+    const todayWorkout = this.getTodayWorkout() || workouts;
+    if (!todayWorkout) {
+      alert('Сначала создайте хотя бы одну тренировку.');
+      return;
+    }
+
+    // Определяем дату ближайшей тренировки
+    const now = new Date();
+    const [hours, minutes] = (schedule.time || '19:00').split(':').map(Number);
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+    
+    // Если время сегодня уже прошло — ставим на завтра
+    if (start < now) {
+      start.setDate(start.getDate() + 1);
+    }
+
+    // Считаем длительность тренировки в секундах
+    const durationSec = todayWorkout.steps.reduce((acc, s, i) => {
+      const work = s.sets * s.work;
+      const rest = Math.max(0, s.sets - 1) * s.rest;
+      const after = i < todayWorkout.steps.length - 1 ? s.afterRest : 0;
+      return acc + work + rest + after;
+    }, 300); // +5 мин запаса
+
+    const end = new Date(start.getTime() + durationSec * 1000);
+
+    const formatICSDate = (d) => {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    };
+
+    // Настраиваем правило повтора (RRULE)
+    let rrule = '';
+    if (schedule.mode === 'cycle' && schedule.cycle.gap > 0) {
+      rrule = `RRULE:FREQ=DAILY;INTERVAL=${schedule.cycle.gap}\r\n`;
+    } else if (schedule.mode === 'weekly') {
+      const dayMap = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+      const activeDays = Object.entries(schedule.weekly)
+        .filter(([, wId]) => wId !== '')
+        .map(([dayIdx]) => dayMap[Number(dayIdx)]);
+      if (activeDays.length > 0) {
+        rrule = `RRULE:FREQ=WEEKLY;BYDAY=${activeDays.join(',')}\r\n`;
+      }
+    }
+
+    const remindMin = Number(schedule.remind) || 30;
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Interval Timer//RU',
+      'BEGIN:VEVENT',
+      `UID:workout-${Date.now()}@intervaltimer`,
+      `DTSTAMP:${formatICSDate(new Date())}`,
+      `DTSTART:${formatICSDate(start)}`,
+      `DTEND:${formatICSDate(end)}`,
+      `SUMMARY:Тренировка: ${todayWorkout.name}`,
+      'DESCRIPTION:Запуск интервального таймера по расписанию.',
+      rrule.trim(),
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Напоминание о тренировке',
+      `TRIGGER:-PT${remindMin}M`,
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workout-schedule.ics';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 }

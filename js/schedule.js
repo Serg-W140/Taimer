@@ -21,6 +21,9 @@ export class ScheduleManager {
       cycleAddSelect: document.getElementById('cycleAddSelect'),
       cycleAddBtn: document.getElementById('cycleAddBtn'),
       saveScheduleBtn: document.getElementById('saveScheduleBtn'),
+      workoutTime: document.getElementById('workoutTime'),
+      remindBefore: document.getElementById('remindBefore'),
+      addToCalendarBtn: document.getElementById('addToCalendarBtn'),
     };
   }
 
@@ -47,6 +50,11 @@ export class ScheduleManager {
     });
 
     this.dom.saveScheduleBtn.addEventListener('click', () => this.#save());
+
+    this.dom.addToCalendarBtn?.addEventListener('click', () => {
+      this.#save(false); // Сохраняем актуальное время без переключения вкладки
+      WorkoutStore.downloadCalendarEvent();
+    });
   }
 
   render() {
@@ -57,6 +65,9 @@ export class ScheduleManager {
     const isWeekly = schedule.mode === 'weekly';
     this.dom.weeklySettings.hidden = !isWeekly;
     this.dom.cycleSettings.hidden = isWeekly;
+    this.dom.workoutTime.value = schedule.time || '19:00';
+    this.dom.remindBefore.value = schedule.remind ?? 30;
+
 
     const days = new Array(
       { id: 1, label: 'Понедельник' },
@@ -120,6 +131,8 @@ export class ScheduleManager {
 
     const schedule = {
       mode: this.dom.scheduleMode.value,
+      time: this.dom.workoutTime.value || '19:00',
+      remind: Number(this.dom.remindBefore.value) || 0,
       weekly,
       cycle: {
         gap: Number(this.dom.cycleGap.value),
@@ -129,6 +142,6 @@ export class ScheduleManager {
     };
 
     WorkoutStore.saveSchedule(schedule);
-    this.onScheduleSaved();
+    if (switchAfter) this.onScheduleSaved();
   }
 }
