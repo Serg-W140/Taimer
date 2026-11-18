@@ -36,9 +36,18 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Игнорируем внешние запросы (например, скрипт Telegram или счётчики)
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        const clone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
