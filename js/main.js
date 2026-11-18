@@ -3,6 +3,7 @@ import { TimerController } from './timer.js';
 import { WorkoutBuilder } from './builder.js';
 import { ScheduleManager } from './schedule.js';
 import { WorkoutStore } from './store.js';
+import { Platform } from './platform.js';
 
 function switchTab(tabName) {
   document.querySelectorAll('.tab-btn').forEach((btn) => {
@@ -14,6 +15,7 @@ function switchTab(tabName) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  Platform.init();
   const sound = new SoundEngine();
   const timer = new TimerController(sound);
 
