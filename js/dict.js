@@ -97,7 +97,19 @@ export const DICT = {
     noCycleItems: 'В цикле пока нет тренировок',
     cycleDayTitle: 'Тренировочный день {num}',
     cycleDayEmpty: 'Тренировочный день {num}: пусто',
-    alertNoWorkoutsCal: 'В графике пока нет ни одной запланированной тренировки.'
+    alertNoWorkoutsCal: 'В графике пока нет ни одной запланированной тренировки.',
+        helpTitle: 'Как пользоваться',
+    helpContent: `
+      <h3>📱 Установка на телефон (офлайн)</h3>
+      <p><b>Android (Chrome):</b> меню (⋮) → «Добавить на главный экран».</p>
+      <p><b>iPhone (Safari):</b> кнопка «Поделиться» → «На экран „Домой“».</p>
+      <p><b>Telegram:</b> все программы автоматически сохраняются в облаке ТГ между телефоном и ПК.</p>
+      <h3>⏱ Таймер и программы</h3>
+      <p>Вкладка <b>Программы</b> позволяет собрать тренировку с раздельным отдыхом между подходами и упражнениями. Нажмите <b>✎</b> на программе, чтобы посмотреть или изменить её.</p>
+      <h3>📅 График и календарь</h3>
+      <p>Назначайте несколько тренировок в день со своим временем по дням недели или циклу. Кнопка <b>«Добавить в календарь»</b> создаст напоминания в телефоне.</p>
+    `
+
   },
   en: {
         appTitle: 'Interval Workout Timer & Planner',
@@ -197,6 +209,18 @@ export const DICT = {
     noCycleItems: 'No workouts in cycle yet',
     cycleDayTitle: 'Workout Day {num}',
     cycleDayEmpty: 'Workout Day {num}: empty',
-    alertNoWorkoutsCal: 'There are no scheduled workouts yet.'
+    alertNoWorkoutsCal: 'There are no scheduled workouts yet.',
+        helpTitle: 'Quick Guide',
+    helpContent: `
+      <h3>📱 Install on Phone (Offline)</h3>
+      <p><b>Android (Chrome):</b> menu (⋮) → «Add to Home screen».</p>
+      <p><b>iPhone (Safari):</b> «Share» button → «Add to Home Screen».</p>
+      <p><b>Telegram:</b> your workouts automatically sync across devices via Telegram Cloud.</p>
+      <h3>⏱ Timer & Workouts</h3>
+      <p>Use the <b>Workouts</b> tab to build multi-step routines with separate rest between sets and exercises. Tap <b>✎</b> to view or edit any saved program.</p>
+      <h3>📅 Schedule & Calendar</h3>
+      <p>Schedule multiple sessions per day by weekday or rolling cycle. Tap <b>«Add to Phone Calendar»</b> to import recurring reminders.</p>
+    `
+
   }
 };

@@ -50,6 +50,11 @@ export class I18n {
     if (toggleBtn) {
       toggleBtn.textContent = this.lang === 'ru' ? 'EN' : 'RU';
     }
+
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+      el.innerHTML = this.t(el.dataset.i18nHtml);
+    });
+
   }
 
     static EX_MAP = {

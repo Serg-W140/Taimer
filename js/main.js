@@ -68,4 +68,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
+
+  const helpModal = document.getElementById('helpModal');
+  document.getElementById('helpBtn')?.addEventListener('click', () => {
+    helpModal.hidden = false;
+  });
+  document.getElementById('closeHelpBtn')?.addEventListener('click', () => {
+    helpModal.hidden = true;
+  });
+  helpModal?.addEventListener('click', (e) => {
+    if (e.target === helpModal) helpModal.hidden = true;
+  });
+
 });

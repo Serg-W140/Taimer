@@ -18,6 +18,7 @@
         <button type="button" class="tab-btn" data-tab="workouts" data-i18n="tabWorkouts">📋 Программы</button>
         <button type="button" class="tab-btn" data-tab="schedule" data-i18n="tabSchedule">📅 График</button>
       </nav>
+      <button type="button" id="helpBtn" class="btn btn-preset" style="padding: 0 12px;">?</button>
       <button type="button" id="langToggleBtn" class="btn btn-preset" style="padding: 0 14px;">EN</button>
     </div>
 
@@ -190,7 +191,15 @@
       </div>
     </section>
   </div>
-
+  <div id="helpModal" class="modal-backdrop" hidden>
+  <div class="modal-card">
+    <div class="row">
+      <h2 data-i18n="helpTitle">Справка и установка</h2>
+      <button type="button" id="closeHelpBtn" class="btn btn-danger btn-xs">✕</button>
+    </div>
+    <div class="help-body" data-i18n-html="helpContent"></div>
+  </div>
+</div>
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>
