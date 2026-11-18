@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'interval-timer-v8';
+const CACHE_NAME = 'interval-timer-v9';
 const ASSETS = new Array(
   './',
   './index.html',
@@ -12,7 +12,8 @@ const ASSETS = new Array(
   './js/sound.js',
   './js/timer.js',
   './js/builder.js',
-  './js/schedule.js'
+  './js/schedule.js',
+  './js/platform.js'
 );
 
 self.addEventListener('install', (event) => {
