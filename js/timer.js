@@ -20,8 +20,7 @@ export class TimerController {
 
   #cacheDOM() {
     this.dom = {
-      todayWorkoutName: document.getElementById('todayWorkoutName'),
-      loadTodayBtn: document.getElementById('loadTodayBtn'),
+      todayWorkoutsList: document.getElementById('todayWorkoutsList'),
       display: document.getElementById('display'),
       exerciseTitle: document.getElementById('exerciseTitle'),
       statusText: document.getElementById('statusText'),
@@ -45,14 +44,9 @@ export class TimerController {
     };
   }
 
-  #bindEvents() {
+#bindEvents() {
     this.dom.startBtn.addEventListener('click', () => this.toggle());
     this.dom.resetBtn.addEventListener('click', () => this.reset());
-
-    this.dom.loadTodayBtn.addEventListener('click', () => {
-      const workout = WorkoutStore.getTodayWorkout();
-      if (workout) this.loadWorkoutPlan(workout);
-    });
 
     this.dom.presetsContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
@@ -82,15 +76,61 @@ export class TimerController {
   }
 
   refreshTodayBanner() {
-    const todayWorkout = WorkoutStore.getTodayWorkout();
-    if (todayWorkout) {
-      this.dom.todayWorkoutName.textContent = todayWorkout.name;
-      this.dom.loadTodayBtn.hidden = false;
-    } else {
-      this.dom.todayWorkoutName.textContent = 'День отдыха или свободный режим';
-      this.dom.loadTodayBtn.hidden = true;
+    const container = this.dom.todayWorkoutsList;
+    if (!container) return;
+
+    const todayList = WorkoutStore.getTodayWorkouts();
+    if (todayList.length === 0) {
+      container.innerHTML = '<strong>День отдыха или свободный режим</strong>';
+      return;
     }
+
+    container.innerHTML = todayList
+      .map(
+        (item, idx) => `
+        <div class="row">
+          <span><strong>${item.time}</strong> — ${item.workout.name}</span>
+          <button type="button" class="btn btn-accent btn-sm" data-today-idx="${idx}">Загрузить</button>
+        </div>`
+      )
+      .join('');
+
+    container.querySelectorAll('[data-today-idx]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const selected = todayList[Number(btn.dataset.todayIdx)];
+        if (selected) this.loadWorkoutPlan(selected.workout);
+      });
+    });
   }
+
+  refreshTodayBanner() {
+  const container = document.getElementById('todayWorkoutsList');
+  if (!container) return;
+
+  const todayList = WorkoutStore.getTodayWorkouts();
+  if (todayList.length === 0) {
+    container.innerHTML = '<strong>День отдыха или свободный режим</strong>';
+    return;
+  }
+
+  container.innerHTML = todayList
+    .map(
+      (item, idx) => `
+      <div class="row">
+        <span><strong>${item.time}</strong> — ${item.workout.name}</span>
+        <button type="button" class="btn btn-accent btn-sm" data-today-idx="${idx}">Загрузить</button>
+      </div>`
+    )
+    .join('');
+
+  container.querySelectorAll('[data-today-idx]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const selected = todayList[Number(btn.dataset.todayIdx)];
+      if (selected) this.loadWorkoutPlan(selected.workout);
+    });
+  });
+}
+
 
   #buildQueue(workoutName, steps) {
     const queue = new Array();

@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'interval-timer-v5';
+const CACHE_NAME = 'interval-timer-v7';
 const ASSETS = new Array(
   './',
   './index.html',

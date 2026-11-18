@@ -28,12 +28,9 @@
   <!-- ==================== ВКЛАДКА 1: ТАЙМЕР ==================== -->
   <div class="tab-content active" id="tab-timer">
     <!-- Баннер тренировки на сегодня -->
-    <div class="today-banner" id="todayBanner">
-      <div class="today-info">
-        <span class="today-label">Сегодня по плану:</span>
-        <strong id="todayWorkoutName">Свободная тренировка</strong>
-      </div>
-      <button type="button" class="btn btn-accent btn-sm" id="loadTodayBtn" hidden>Загрузить</button>
+    <div class="today-banner" id="todayBanner" style="flex-direction: column; align-items: stretch;">
+      <span class="today-label">Сегодня по плану</span>
+      <div id="todayWorkoutsList" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
     </div>
 
     <!-- Табло -->
@@ -181,69 +178,63 @@
   </div>
 
   <!-- ==================== ВКЛАДКА 3: ГРАФИК ==================== -->
-  <div class="tab-content" id="tab-schedule">
-    <section class="settings">
-      <h2>Режим расписания</h2>
+<div id="tab-schedule" class="tab-content">
+  <div class="settings">
+    <h2>График тренировок</h2>
+
+    <div class="row">
+      <label for="scheduleMode">Режим графика</label>
+      <select id="scheduleMode">
+        <option value="weekly">По дням недели</option>
+        <option value="cycle">Скользящий цикл</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="remindBefore">Напомнить за (мин)</label>
+      <input type="number" id="remindBefore" value="30" min="0" max="1440">
+    </div>
+
+    <!-- Настройки по дням недели -->
+    <div id="weeklySettings" class="schedule-block"></div>
+
+    <!-- Настройки скользящего цикла -->
+    <div id="cycleSettings" class="schedule-block" hidden>
       <div class="row">
-        <label for="scheduleMode">Тип графика</label>
-        <select id="scheduleMode">
-          <option value="weekly">По дням недели (Пн, Ср, Пт...)</option>
-          <option value="cycle">Цикл по кругу (через N дней)</option>
-        </select>
+        <label for="cycleGap">Интервал (раз в N дней)</label>
+        <input type="number" id="cycleGap" value="2" min="1" max="30">
+      </div>
+      <div class="row">
+        <label for="cycleStart">Дата старта цикла</label>
+        <input type="date" id="cycleStart">
       </div>
 
-      <!-- Режим 1: По дням недели -->
-      <div id="weeklySettings" class="schedule-block"></div>
-
-      <!-- Режим 2: Цикл -->
-      <div id="cycleSettings" class="schedule-block" hidden>
+      <div class="step-adder">
+        <small style="color:#aaa">Добавить слот в цикл (укажите день цикла, время и программу):</small>
         <div class="row">
-          <label for="cycleGap">Тренировка каждые (дней)</label>
-          <select id="cycleGap">
-            <option value="1">Каждый день</option>
-            <option value="2" selected>Через 1 день (день через день)</option>
-            <option value="3">Через 2 дня (раз в 3 дня)</option>
+          <select id="cycleDaySlot" style="width: 90px;">
+            <option value="0">День 1</option>
+            <option value="1">День 2</option>
+            <option value="2">День 3</option>
+            <option value="3">День 4</option>
+            <option value="4">День 5</option>
+            <option value="5">День 6</option>
+            <option value="6">День 7</option>
           </select>
-        </div>
-        <div class="row">
-          <label for="cycleStart">Дата старта цикла</label>
-          <input type="date" id="cycleStart">
-        </div>
-        <div class="cycle-list-header">
-          <small>Порядок тренировок в цикле:</small>
-        </div>
-        <div id="cycleWorkoutsList" class="draft-list"></div>
-        <div class="row">
+          <input type="time" id="cycleTimeInput" value="19:00">
           <select id="cycleAddSelect"></select>
-          <button type="button" class="btn btn-preset btn-sm" id="cycleAddBtn">+ Добавить</button>
         </div>
+        <button type="button" id="cycleAddBtn" class="btn btn-preset full-btn">+ Добавить в цикл</button>
       </div>
 
-      <div class="row">
-        <label for="workoutTime">Время начала</label>
-        <input type="time" id="workoutTime" value="19:00">
-      </div>
-      <div class="row">
-        <label for="remindBefore">Напомнить за (мин)</label>
-        <input type="number" id="remindBefore" value="30" min="0" max="1440">
-      </div>
+      <div id="cycleWorkoutsList" class="workout-list"></div>
+    </div>
 
-
-      <button type="button" class="btn btn-start full-btn" id="saveScheduleBtn">✅ Применить график</button>
-
-      <button type="button" id="addToCalendarBtn" class="btn btn-preset full-btn">📅 Добавить в календарь телефона</button>
-
-
-      <div class="settings">
-        <h2>Резервная копия и перенос</h2>
-        <div class="controls">
-            <button type="button" id="exportBtn" class="btn btn-preset">📥 Скачать файл</button>
-            <button type="button" id="importBtn" class="btn btn-preset">📤 Загрузить файл</button>
-        </div>
-        <input type="file" id="importFileInput" accept=".json" hidden>
-      </div>
-    </section>
+    <button type="button" id="saveScheduleBtn" class="btn btn-accent full-btn">Сохранить график</button>
+    <button type="button" id="addToCalendarBtn" class="btn btn-preset full-btn">📅 Добавить в календарь телефона</button>
   </div>
+</div>
+
 </main>
 
 <script type="module" src="./js/main.js"></script>
