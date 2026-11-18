@@ -14,8 +14,9 @@ function switchTab(tabName) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   Platform.init();
+
   const sound = new SoundEngine();
   const timer = new TimerController(sound);
 
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  new WorkoutBuilder({
+  const builder = new WorkoutBuilder({
     onRunWorkout: (workout) => {
       timer.loadWorkoutPlan(workout);
       switchTab('timer');
@@ -36,6 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
       timer.refreshTodayBanner();
     }
   });
+
+  // Подтягиваем данные из облака Telegram (если запущено в ТГ)
+  const updatedFromCloud = await WorkoutStore.syncFromCloud();
+  if (updatedFromCloud) {
+    builder.renderExerciseOptions();
+    builder.renderSavedWorkouts();
+    schedule.render();
+    timer.refreshTodayBanner();
+  }
 
   // Переключение вкладок
   document.getElementById('mainTabs').addEventListener('click', (e) => {
@@ -47,20 +57,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
-
-    document.getElementById('exportBtn')?.addEventListener('click', () => {
-    WorkoutStore.exportData();
-  });
-
-  const fileInput = document.getElementById('importFileInput');
-  document.getElementById('importBtn')?.addEventListener('click', () => fileInput.click());
-  
-  fileInput?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    WorkoutStore.importData(file, () => {
-      alert('Данные успешно загружены!');
-      location.reload(); // Перезагружаем страницу, чтобы обновить все списки
-    });
-  });
 });

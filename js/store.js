@@ -1,3 +1,5 @@
+import { Platform } from "./platform";
+
 const DEFAULT_EXERCISES = [
   'Разминка',
   'Подтягивания',
@@ -63,7 +65,9 @@ export class WorkoutStore {
     const list = this.getExercises();
     if (!list.includes(clean)) {
       list.push(clean);
-      localStorage.setItem(this.KEYS.EXERCISES, JSON.stringify(list));
+      const json = JSON.stringify(list);
+      localStorage.setItem(this.KEYS.EXERCISES, json);
+      Platform.saveCloud(this.KEYS.EXERCISES, json);
     }
   }
 
@@ -73,7 +77,9 @@ export class WorkoutStore {
   }
 
   static saveWorkouts(list) {
-    localStorage.setItem(this.KEYS.WORKOUTS, JSON.stringify(list));
+    const json = JSON.stringify(list);
+    localStorage.setItem(this.KEYS.WORKOUTS, json);
+    Platform.saveCloud(this.KEYS.WORKOUTS, json);
   }
 
   static getSchedule() {
@@ -128,7 +134,33 @@ export class WorkoutStore {
   }
 
   static saveSchedule(schedule) {
-    localStorage.setItem(this.KEYS.SCHEDULE, JSON.stringify(schedule));
+    const json = JSON.stringify(schedule);
+    localStorage.setItem(this.KEYS.SCHEDULE, json);
+    Platform.saveCloud(this.KEYS.SCHEDULE, json);
+  }
+
+  // Синхронизация при старте приложения в Telegram
+  static async syncFromCloud() {
+    if (!Platform.isTelegram) return false;
+
+    const keys = Object.values(this.KEYS);
+    const cloudData = await Platform.loadCloud(keys);
+    if (!cloudData) return false;
+
+    let hasChanges = false;
+    keys.forEach((key) => {
+      const remoteVal = cloudData[key];
+      const localVal = localStorage.getItem(key);
+      if (remoteVal && remoteVal !== localVal) {
+        localStorage.setItem(key, remoteVal);
+        hasChanges = true;
+      } else if (!remoteVal && localVal) {
+        // Если в облаке пусто, а локально уже есть данные — выгружаем их в облако
+        Platform.saveCloud(key, localVal);
+      }
+    });
+
+    return hasChanges;
   }
 
   // Возвращает массив объектов: [{ time: '08:00', workout: {...} }, ...]
