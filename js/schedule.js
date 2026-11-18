@@ -1,4 +1,5 @@
 import { WorkoutStore } from './store.js';
+import { I18n } from './i18n.js';
 
 export class ScheduleManager {
   constructor({ onScheduleSaved }) {
@@ -36,7 +37,6 @@ export class ScheduleManager {
       this.dom.cycleSettings.hidden = isWeekly;
     });
 
-    // Добавление / удаление слота в режиме "По дням недели"
     this.dom.weeklySettings.addEventListener('click', (e) => {
       const addBtn = e.target.closest('[data-week-add]');
       const delBtn = e.target.closest('[data-week-del]');
@@ -61,7 +61,6 @@ export class ScheduleManager {
       }
     });
 
-    // Добавление слота в режим "Цикл"
     this.dom.cycleAddBtn.addEventListener('click', () => {
       const dayIdx = Number(this.dom.cycleDaySlot.value);
       const time = this.dom.cycleTimeInput.value || '19:00';
@@ -76,14 +75,12 @@ export class ScheduleManager {
       this.#renderCycleSequence();
     });
 
-    // Удаление слота из цикла
     this.dom.cycleWorkoutsList.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-cycle-del]');
       if (!btn) return;
       const dayIdx = Number(btn.dataset.cycleDay);
       const slotIdx = Number(btn.dataset.cycleDel);
       this.cycleSequence[dayIdx].splice(slotIdx, 1);
-      // Убираем пустые дни с конца массива
       while (this.cycleSequence.length > 0 && this.cycleSequence[this.cycleSequence.length - 1].length === 0) {
         this.cycleSequence.pop();
       }
@@ -109,7 +106,6 @@ export class ScheduleManager {
     this.dom.weeklySettings.hidden = !isWeekly;
     this.dom.cycleSettings.hidden = isWeekly;
 
-    // Копируем расписание в локальный черновик
     for (let d = 0; d <= 6; d += 1) {
       this.weeklyDraft[d] = (schedule.weekly[d] || []).map((s) => ({ ...s }));
     }
@@ -118,7 +114,7 @@ export class ScheduleManager {
     this.dom.cycleGap.value = schedule.cycle.gap;
     this.dom.cycleStart.value = schedule.cycle.startDate;
     this.dom.cycleAddSelect.innerHTML = workouts
-      .map((w) => `<option value="${w.id}">${w.name}</option>`)
+      .map((w) => `<option value="${w.id}">${I18n.ex(w.name)}</option>`)
       .join('');
 
     this.#renderWeekly();
@@ -128,42 +124,33 @@ export class ScheduleManager {
   #renderWeekly() {
     const workouts = WorkoutStore.getWorkouts();
     const optionsHtml = workouts.map((w) => `<option value="${w.id}">${w.name}</option>`).join('');
+    const dayIds = new Array(1, 2, 3, 4, 5, 6, 0);
 
-    const days = [
-      { id: 1, label: 'Понедельник' },
-      { id: 2, label: 'Вторник' },
-      { id: 3, label: 'Среда' },
-      { id: 4, label: 'Четверг' },
-      { id: 5, label: 'Пятница' },
-      { id: 6, label: 'Суббота' },
-      { id: 0, label: 'Воскресенье' }
-    ];
-
-    this.dom.weeklySettings.innerHTML = days
-      .map((d) => {
-        const slots = this.weeklyDraft[d.id] || [];
+    this.dom.weeklySettings.innerHTML = dayIds
+      .map((id) => {
+        const slots = this.weeklyDraft[id] || [];
         const slotsHtml = slots.length
           ? slots
               .map((s, idx) => {
                 const w = workouts.find((item) => item.id === s.workoutId);
-                const title = w ? w.name : 'Удалённая тренировка';
+                const title = w ? w.name : I18n.t('deletedWorkout');
                 return `
                   <div class="list-item" style="padding: 6px 10px;">
                     <span><strong>${s.time}</strong> — ${title}</span>
-                    <button type="button" class="btn btn-danger btn-xs" data-week-day="${d.id}" data-week-del="${idx}">✕</button>
+                    <button type="button" class="btn btn-danger btn-xs" data-week-day="${id}" data-week-del="${idx}">✕</button>
                   </div>`;
               })
               .join('')
-          : '<small style="color:#777;">День отдыха</small>';
+          : `<small style="color:#777;">${I18n.t('restDay')}</small>`;
 
         return `
           <div class="step-adder day-card" style="gap: 8px;">
-            <strong style="font-size: 0.95rem;">${d.label}</strong>
+            <strong style="font-size: 0.95rem;">${I18n.t('weekDay' + id)}</strong>
             ${slotsHtml}
             <div class="row" style="margin-top: 4px;">
               <input type="time" class="week-time-input" value="19:00">
               <select class="week-workout-select">${optionsHtml}</select>
-              <button type="button" class="btn btn-preset btn-sm" data-week-add="${d.id}">+</button>
+              <button type="button" class="btn btn-preset btn-sm" data-week-add="${id}">+</button>
             </div>
           </div>`;
       })
@@ -173,19 +160,19 @@ export class ScheduleManager {
   #renderCycleSequence() {
     const workouts = WorkoutStore.getWorkouts();
     if (this.cycleSequence.length === 0) {
-      this.dom.cycleWorkoutsList.innerHTML = '<small style="color:#888;">В цикле пока нет тренировок</small>';
+      this.dom.cycleWorkoutsList.innerHTML = `<small style="color:#888;">${I18n.t('noCycleItems')}</small>`;
       return;
     }
 
     this.dom.cycleWorkoutsList.innerHTML = this.cycleSequence
       .map((daySlots, dayIdx) => {
         if (!daySlots || daySlots.length === 0) {
-          return `<div class="list-item"><small>Тренировочный день ${dayIdx + 1}: пусто</small></div>`;
+          return `<div class="list-item"><small>${I18n.t('cycleDayEmpty', { num: dayIdx + 1 })}</small></div>`;
         }
         const itemsHtml = daySlots
           .map((s, slotIdx) => {
             const w = workouts.find((item) => item.id === s.workoutId);
-            const title = w ? w.name : 'Удалённая тренировка';
+            const title = w ? w.name : I18n.t('deletedWorkout');
             return `
               <div class="row" style="margin-top: 4px;">
                 <span><strong>${s.time}</strong> — ${title}</span>
@@ -196,7 +183,7 @@ export class ScheduleManager {
 
         return `
           <div class="step-adder" style="gap: 4px;">
-            <small style="color: var(--accent); font-weight: 700;">Тренировочный день ${dayIdx + 1}</small>
+            <small style="color: var(--accent); font-weight: 700;">${I18n.t('cycleDayTitle', { num: dayIdx + 1 })}</small>
             ${itemsHtml}
           </div>`;
       })

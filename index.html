@@ -2,243 +2,197 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#121212">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Таймер">
-  
-  <title>Спортивный таймер и планер</title>
-  
+  <title data-i18n="appTitle">Спортивный таймер и планер</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org"></script>
-
 </head>
 <body>
-
-<main class="container">
-  <!-- Навигация по вкладкам -->
-  <nav class="tabs" id="mainTabs">
-    <button type="button" class="tab-btn active" data-tab="timer">⏱ Таймер</button>
-    <button type="button" class="tab-btn" data-tab="builder">📋 Программы</button>
-    <button type="button" class="tab-btn" data-tab="schedule">📅 График</button>
-  </nav>
-
-  <!-- ==================== ВКЛАДКА 1: ТАЙМЕР ==================== -->
-  <div class="tab-content active" id="tab-timer">
-    <!-- Баннер тренировки на сегодня -->
-    <div class="today-banner" id="todayBanner" style="flex-direction: column; align-items: stretch;">
-      <span class="today-label">Сегодня по плану</span>
-      <div id="todayWorkoutsList" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
+  <div class="container">
+    <div style="display: flex; gap: 8px; align-items: stretch;">
+      <nav class="tabs" id="mainTabs" style="flex: 1;">
+        <button type="button" class="tab-btn active" data-tab="timer" data-i18n="tabTimer">⏱ Таймер</button>
+        <button type="button" class="tab-btn" data-tab="workouts" data-i18n="tabWorkouts">📋 Программы</button>
+        <button type="button" class="tab-btn" data-tab="schedule" data-i18n="tabSchedule">📅 График</button>
+      </nav>
+      <button type="button" id="langToggleBtn" class="btn btn-preset" style="padding: 0 14px;">EN</button>
     </div>
 
-    <!-- Табло -->
-    <section class="display" id="display" aria-live="polite">
-      <div class="exercise-title" id="exerciseTitle">Свободный режим</div>
-      <div class="status" id="statusText">ГОТОВ К СТАРТУ</div>
-      <div class="time" id="timeText">03:00</div>
-      <div class="round-info" id="roundText">Подход: 1 / 3</div>
-      <div class="next-info" id="nextText"></div>
-    </section>
-
-    <!-- Управление -->
-    <section class="controls">
-      <button type="button" class="btn btn-start" id="startBtn">Старт</button>
-      <button type="button" class="btn btn-reset" id="resetBtn">Сброс</button>
-    </section>
-
-    <!-- Быстрые пресеты (для свободного режима) -->
-    <section class="presets" id="presetsContainer">
-      <button type="button" class="btn btn-preset" data-rounds="3" data-work="180" data-rest="60" data-sound="gong">
-        🥊 Бокс (3×3м / 1м)
-      </button>
-      <button type="button" class="btn btn-preset" data-rounds="5" data-work="30" data-rest="60" data-sound="whistle">
-        ⏱ 5×30с / 1м
-      </button>
-      <button type="button" class="btn btn-preset" data-rounds="8" data-work="20" data-rest="10" data-sound="beep">
-        🔥 Табата (8×20с/10с)
-      </button>
-      <button type="button" class="btn btn-preset" id="testSoundBtn">
-        🔊 Тест звука
-      </button>
-    </section>
-
-    <!-- Ручные настройки (скрываются, если загружена программа) -->
-    <section class="settings" id="quickSettings">
-      <div class="settings-header">
-        <h2>Быстрая настройка</h2>
-      </div>
-      <div class="row">
-        <label for="roundsInput">Подходов</label>
-        <input type="number" id="roundsInput" value="3" min="1" max="99">
-      </div>
-      <div class="row">
-        <label>Работа (мин : сек)</label>
-        <div class="time-inputs">
-          <input type="number" id="workMin" value="3" min="0" max="59">
-          <span>:</span>
-          <input type="number" id="workSec" value="0" min="0" max="59">
-        </div>
-      </div>
-      <div class="row">
-        <label>Отдых (мин : сек)</label>
-        <div class="time-inputs">
-          <input type="number" id="restMin" value="1" min="0" max="59">
-          <span>:</span>
-          <input type="number" id="restSec" value="0" min="0" max="59">
-        </div>
-      </div>
-    </section>
-
-    <!-- Глобальные настройки звука -->
-    <section class="settings" id="soundSettings">
-      <h2>Звук и оповещения</h2>
-      <div class="row">
-        <label for="prepSec">Подготовка перед стартом (сек)</label>
-        <input type="number" id="prepSec" value="5" min="0" max="60">
-      </div>
-      <div class="row">
-        <label for="soundType">Основной сигнал</label>
-        <select id="soundType">
-          <option value="gong">Боксёрский гонг</option>
-          <option value="whistle">Свисток тренера</option>
-          <option value="beep">Электронный сигнал</option>
-        </select>
-      </div>
-      <div class="row">
-        <label for="voiceCheck">Голосовой помощник (названия)</label>
-        <input type="checkbox" id="voiceCheck" checked>
-      </div>
-      <div class="row">
-        <label for="warnCheck">Сигнал за 10 сек до конца</label>
-        <input type="checkbox" id="warnCheck" checked>
-      </div>
-      <div class="row">
-        <label for="tickCheck">Тиканье секунд в работе</label>
-        <input type="checkbox" id="tickCheck" checked>
-      </div>
-    </section>
-  </div>
-
-  <!-- ==================== ВКЛАДКА 2: ПРОГРАММЫ ==================== -->
-  <div class="tab-content" id="tab-builder">
-    <!-- Список сохранённых тренировок -->
-    <section class="settings">
-      <h2>Мои тренировки</h2>
-      <div id="savedWorkoutsList" class="workout-list"></div>
-    </section>
-
-    <!-- Конструктор новой тренировки -->
-    <section class="settings">
-      <h2>Создать программу</h2>
-      <div class="row">
-        <input type="text" id="workoutNameInput" class="full-input" placeholder="Название (напр. День 1: Турник и брусья)">
+    <section id="tab-timer" class="tab-content active">
+      <div class="today-banner" id="todayBanner" style="flex-direction: column; align-items: stretch;">
+        <span class="today-label" data-i18n="todayLabel">Сегодня по плану</span>
+        <div id="todayWorkoutsList" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;"></div>
       </div>
 
-      <!-- Добавление шага -->
-      <div class="step-adder">
+      <div class="display" id="display">
+        <div class="exercise-title" id="exerciseTitle">Свободный режим</div>
+        <div class="status" id="statusText">ГОТОВ К СТАРТУ</div>
+        <div class="time" id="timeText">03:00</div>
+        <div class="round-info" id="roundText">Подход: 1 / 3</div>
+        <div class="next-info" id="nextText"></div>
+      </div>
+
+            <!-- Блок управления, пресеты и настройки таймера и звука -->
+      <div class="controls">
+        <button type="button" id="startBtn" class="btn btn-start" data-i18n="btnStart">Старт</button>
+        <button type="button" id="resetBtn" class="btn btn-reset" data-i18n="btnReset">Сброс</button>
+      </div>
+      <div class="presets" id="presetsContainer">
+        <!-- Пресеты для бокса, интервалов, табаты и теста звука -->
+          <button type="button" class="btn btn-preset" data-rounds="3" data-work="180" data-rest="60" data-sound="gong" data-i18n="presetBox">🥊 Бокс (3×3м / 1м)</button>
+          <button type="button" class="btn btn-preset" data-rounds="5" data-work="30" data-rest="60" data-sound="whistle" data-i18n="presetInterval">⏱ 5×30с / 1м</button>
+          <button type="button" class="btn btn-preset" data-rounds="8" data-work="20" data-rest="10" data-sound="beep" data-i18n="presetTabata">🔥 Табата (8×20с/10с)</button>
+          <button type="button" id="testSoundBtn" class="btn btn-preset" data-i18n="btnTestSound">🔊 Тест звука</button>
+      </div>
+      <div class="settings" id="quickSettings">
+        <!-- Настройки раундов и времени работы/отдыха -->
+         <h2 data-i18n="quickSettingsTitle">Быстрая настройка</h2>
         <div class="row">
-          <label for="exerciseSelect">Упражнение</label>
-          <select id="exerciseSelect"></select>
+          <label for="roundsInput" data-i18n="roundsLabel">Подходов</label>
+          <input type="number" id="roundsInput" value="3" min="1" max="99">
         </div>
-        
-        <div class="row" id="customExRow" hidden>
-          <input type="text" id="customExInput" class="full-input" placeholder="Введите своё упражнение...">
-        </div>
-
-        <div class="grid-3">
-          <div>
-            <small>Подходы</small>
-            <input type="number" id="stepSets" value="3" min="1" max="50">
-          </div>
-          <div>
-            <small>Работа (сек)</small>
-            <input type="number" id="stepWork" value="30" min="5" max="3600">
-          </div>
-          <div>
-            <small>Отдых (сек)</small>
-            <input type="number" id="stepRest" value="40" min="0" max="600">
+        <div class="row">
+          <label data-i18n="workTimeLabel">Работа (мин : сек)</label>
+          <div class="time-inputs">
+            <input type="number" id="workMin" value="3" min="0" max="59">
+            <span>:</span>
+            <input type="number" id="workSec" value="0" min="0" max="59">
           </div>
         </div>
-
         <div class="row">
-          <label for="stepAfterRest">Отдых после упражнения (сек)</label>
-          <input type="number" id="stepAfterRest" value="60" min="0" max="600">
+          <label data-i18n="restTimeLabel">Отдых (мин : сек)</label>
+          <div class="time-inputs">
+            <input type="number" id="restMin" value="1" min="0" max="59">
+            <span>:</span>
+            <input type="number" id="restSec" value="0" min="0" max="59">
+          </div>
         </div>
-
-        <button type="button" class="btn btn-preset full-btn" id="addStepBtn">+ Добавить шаг в программу</button>
       </div>
-
-      <!-- Черновик шагов -->
-      <div id="draftStepsList" class="draft-list"></div>
-
-      <button type="button" class="btn btn-start full-btn" id="saveWorkoutBtn">💾 Сохранить тренировку</button>
-    </section>
-  </div>
-
-  <!-- ==================== ВКЛАДКА 3: ГРАФИК ==================== -->
-<div id="tab-schedule" class="tab-content">
-  <div class="settings">
-    <h2>График тренировок</h2>
-
-    <div class="row">
-      <label for="scheduleMode">Режим графика</label>
-      <select id="scheduleMode">
-        <option value="weekly">По дням недели</option>
-        <option value="cycle">Скользящий цикл</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <label for="remindBefore">Напомнить за (мин)</label>
-      <input type="number" id="remindBefore" value="30" min="0" max="1440">
-    </div>
-
-    <!-- Настройки по дням недели -->
-    <div id="weeklySettings" class="schedule-block"></div>
-
-    <!-- Настройки скользящего цикла -->
-    <div id="cycleSettings" class="schedule-block" hidden>
-      <div class="row">
-        <label for="cycleGap">Интервал (раз в N дней)</label>
-        <input type="number" id="cycleGap" value="2" min="1" max="30">
-      </div>
-      <div class="row">
-        <label for="cycleStart">Дата старта цикла</label>
-        <input type="date" id="cycleStart">
-      </div>
-
-      <div class="step-adder">
-        <small style="color:#aaa">Добавить слот в цикл (укажите день цикла, время и программу):</small>
+      <div class="settings">
+        <!-- Настройки звуковых сигналов и голосового помощника -->
+         <h2 data-i18n="soundSettingsTitle">Звук и оповещения</h2>
         <div class="row">
-          <select id="cycleDaySlot" style="width: 90px;">
-            <option value="0">День 1</option>
-            <option value="1">День 2</option>
-            <option value="2">День 3</option>
-            <option value="3">День 4</option>
-            <option value="4">День 5</option>
-            <option value="5">День 6</option>
-            <option value="6">День 7</option>
+          <label for="prepSec" data-i18n="prepSecLabel">Подготовка перед стартом (сек)</label>
+          <input type="number" id="prepSec" value="5" min="0" max="60">
+        </div>
+        <div class="row">
+          <label for="soundType" data-i18n="soundTypeLabel">Основной сигнал</label>
+          <select id="soundType">
+            <option value="gong" data-i18n="soundGong">Боксёрский гонг</option>
+            <option value="whistle" data-i18n="soundWhistle">Свисток тренера</option>
+            <option value="beep" data-i18n="soundBeep">Электронный сигнал</option>
           </select>
-          <input type="time" id="cycleTimeInput" value="19:00">
-          <select id="cycleAddSelect"></select>
         </div>
-        <button type="button" id="cycleAddBtn" class="btn btn-preset full-btn">+ Добавить в цикл</button>
+        <div class="row">
+          <label for="voiceCheck" data-i18n="voiceCheckLabel">Голосовой помощник (названия)</label>
+          <input type="checkbox" id="voiceCheck" checked>
+        </div>
+        <div class="row">
+          <label for="warnCheck" data-i18n="warnCheckLabel">Сигнал за 10 сек до конца</label>
+          <input type="checkbox" id="warnCheck" checked>
+        </div>
+        <div class="row">
+          <label for="tickCheck" data-i18n="tickCheckLabel">Тиканье секунд в работе</label>
+          <input type="checkbox" id="tickCheck" checked>
+        </div>
+      </div>
+    </section>
+
+            <section id="tab-workouts" class="tab-content">
+      <div class="settings">
+        <h2 data-i18n="myWorkoutsTitle">Мои тренировки</h2>
+        <div id="savedWorkoutsList" class="workout-list"></div>
       </div>
 
-      <div id="cycleWorkoutsList" class="workout-list"></div>
-    </div>
+      <div class="settings">
+        <h2 data-i18n="createWorkoutTitle">Создать программу</h2>
+        <input type="text" id="workoutNameInput" class="full-input" data-i18n-ph="workoutNamePh" placeholder="Название тренировки (например: Грудь и спина)">
 
-    <button type="button" id="saveScheduleBtn" class="btn btn-accent full-btn">Сохранить график</button>
-    <button type="button" id="addToCalendarBtn" class="btn btn-preset full-btn">📅 Добавить в календарь телефона</button>
+        <div class="step-adder">
+          <div class="row">
+            <label for="exerciseSelect" data-i18n="exerciseLabel">Упражнение</label>
+            <select id="exerciseSelect"></select>
+          </div>
+          <div class="row" id="customExRow" hidden>
+            <input type="text" id="customExInput" class="full-input" data-i18n-ph="customExPh" placeholder="Название упражнения">
+          </div>
+          <div class="grid-3">
+            <div><small data-i18n="setsCol">Подходы</small><input type="number" id="stepSets" value="3" min="1" max="50"></div>
+            <div><small data-i18n="workCol">Работа (сек)</small><input type="number" id="stepWork" value="30" min="5" max="3600"></div>
+            <div><small data-i18n="restCol">Отдых (сек)</small><input type="number" id="stepRest" value="40" min="0" max="3600"></div>
+          </div>
+          <div class="row">
+            <label for="stepAfterRest" data-i18n="afterRestLabel">Отдых после упражнения (сек)</label>
+            <input type="number" id="stepAfterRest" value="60" min="0" max="3600">
+          </div>
+          <button type="button" id="addStepBtn" class="btn btn-preset full-btn" data-i18n="btnAddStep">+ Добавить шаг в программу</button>
+        </div>
+
+        <div id="draftStepsList" class="draft-list"></div>
+        <button type="button" id="saveWorkoutBtn" class="btn btn-accent full-btn" data-i18n="btnSaveWorkout">💾 Сохранить тренировку</button>
+      </div>
+    </section>
+      <section id="tab-schedule" class="tab-content">
+      <div class="settings">
+        <h2 data-i18n="scheduleTitle">График тренировок</h2>
+
+        <div class="row">
+          <label for="scheduleMode" data-i18n="scheduleModeLabel">Режим графика</label>
+          <select id="scheduleMode">
+            <option value="weekly" data-i18n="modeWeekly">По дням недели</option>
+            <option value="cycle" data-i18n="modeCycle">Скользящий цикл</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="remindBefore" data-i18n="remindBeforeLabel">Напомнить за (мин)</label>
+          <input type="number" id="remindBefore" value="30" min="0" max="1440">
+        </div>
+
+        <div id="weeklySettings" class="schedule-block"></div>
+
+        <div id="cycleSettings" class="schedule-block" hidden>
+          <div class="row">
+            <label for="cycleGap" data-i18n="cycleGapLabel">Интервал (раз в N дней)</label>
+            <input type="number" id="cycleGap" value="2" min="1" max="30">
+          </div>
+          <div class="row">
+            <label for="cycleStart" data-i18n="cycleStartLabel">Дата старта цикла</label>
+            <input type="date" id="cycleStart">
+          </div>
+
+          <div class="step-adder">
+            <small style="color:#aaa" data-i18n="cycleSlotHint">Добавить слот в цикл (день цикла, время и программу):</small>
+            <div class="row">
+              <select id="cycleDaySlot" style="width: 90px;">
+                <option value="0" data-i18n="day1">День 1</option>
+                <option value="1" data-i18n="day2">День 2</option>
+                <option value="2" data-i18n="day3">День 3</option>
+                <option value="3" data-i18n="day4">День 4</option>
+                <option value="4" data-i18n="day5">День 5</option>
+                <option value="5" data-i18n="day6">День 6</option>
+                <option value="6" data-i18n="day7">День 7</option>
+              </select>
+              <input type="time" id="cycleTimeInput" value="19:00">
+              <select id="cycleAddSelect"></select>
+            </div>
+            <button type="button" id="cycleAddBtn" class="btn btn-preset full-btn" data-i18n="btnAddCycle">+ Добавить в цикл</button>
+          </div>
+
+          <div id="cycleWorkoutsList" class="workout-list"></div>
+        </div>
+
+        <button type="button" id="saveScheduleBtn" class="btn btn-accent full-btn" data-i18n="btnSaveSchedule">Сохранить график</button>
+        <button type="button" id="addToCalendarBtn" class="btn btn-preset full-btn" data-i18n="btnCalendar">📅 Добавить в календарь телефона</button>
+      </div>
+    </section>
   </div>
-</div>
 
-</main>
-
-<script type="module" src="./js/main.js"></script>
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>
+
+

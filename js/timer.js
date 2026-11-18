@@ -1,4 +1,5 @@
 import { WorkoutStore } from './store.js';
+import { I18n } from './i18n.js';
 
 export class TimerController {
   constructor(soundEngine) {
@@ -7,10 +8,10 @@ export class TimerController {
     this.wakeLock = null;
     this.isRunning = false;
 
-    this.queue = new Array();
+    this.queue = [];
     this.currentIndex = 0;
     this.secondsLeft = 0;
-    this.activeWorkoutName = 'Свободный режим';
+    this.activeWorkoutName = I18n.t('freeMode');
 
     this.#cacheDOM();
     this.#bindEvents();
@@ -44,7 +45,7 @@ export class TimerController {
     };
   }
 
-#bindEvents() {
+  #bindEvents() {
     this.dom.startBtn.addEventListener('click', () => this.toggle());
     this.dom.resetBtn.addEventListener('click', () => this.reset());
 
@@ -81,7 +82,7 @@ export class TimerController {
 
     const todayList = WorkoutStore.getTodayWorkouts();
     if (todayList.length === 0) {
-      container.innerHTML = '<strong>День отдыха или свободный режим</strong>';
+      container.innerHTML = `<strong>${I18n.t('restDay')}</strong>`;
       return;
     }
 
@@ -89,8 +90,8 @@ export class TimerController {
       .map(
         (item, idx) => `
         <div class="row">
-          <span><strong>${item.time}</strong> — ${item.workout.name}</span>
-          <button type="button" class="btn btn-accent btn-sm" data-today-idx="${idx}">Загрузить</button>
+          <span><strong>${item.time}</strong> — ${I18n.ex(item.workout.name)}</span>
+          <button type="button" class="btn btn-accent btn-sm" data-today-idx="${idx}">${I18n.t('btnLoad')}</button>
         </div>`
       )
       .join('');
@@ -103,69 +104,42 @@ export class TimerController {
     });
   }
 
-  refreshTodayBanner() {
-  const container = document.getElementById('todayWorkoutsList');
-  if (!container) return;
-
-  const todayList = WorkoutStore.getTodayWorkouts();
-  if (todayList.length === 0) {
-    container.innerHTML = '<strong>День отдыха или свободный режим</strong>';
-    return;
-  }
-
-  container.innerHTML = todayList
-    .map(
-      (item, idx) => `
-      <div class="row">
-        <span><strong>${item.time}</strong> — ${item.workout.name}</span>
-        <button type="button" class="btn btn-accent btn-sm" data-today-idx="${idx}">Загрузить</button>
-      </div>`
-    )
-    .join('');
-
-  container.querySelectorAll('[data-today-idx]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const selected = todayList[Number(btn.dataset.todayIdx)];
-      if (selected) this.loadWorkoutPlan(selected.workout);
-    });
-  });
-}
-
-
   #buildQueue(workoutName, steps) {
-    const queue = new Array();
+    const wTitle = I18n.ex(workoutName);
+    const queue = [];
     const prep = Math.max(0, parseInt(this.dom.prepSec.value, 10) || 0);
 
     if (prep > 0 && steps.length > 0) {
       queue.push({
         phase: 'prep',
-        title: workoutName,
-        status: 'ПОДГОТОВКА',
+        title: wTitle,
+        status: I18n.t('statusPrep'),
         duration: prep,
-        roundInfo: `Первое: ${steps[0].name}`,
-        speak: `Подготовка. Первое упражнение: ${steps[0].name}`
+        roundInfo: I18n.t('firstExercise', { name: I18n.ex(steps[0].name) }),
+        speak: I18n.t('speakPrep', { name: I18n.ex(steps[0].name) })
       });
     }
 
     steps.forEach((step, stepIdx) => {
+      const stepName = I18n.ex(step.name);
       for (let s = 1; s <= step.sets; s += 1) {
         queue.push({
           phase: 'work',
-          title: step.name,
-          status: 'РАБОТА!',
+          title: stepName,
+          status: I18n.t('statusWork'),
           duration: step.work,
-          roundInfo: `Подход: ${s} / ${step.sets}`,
-          speak: `${step.name}. Подход ${s}`
+          roundInfo: I18n.t('roundInfo', { curr: s, total: step.sets }),
+          speak: I18n.t('speakWork', { name: stepName, set: s })
         });
 
         if (s < step.sets && step.rest > 0) {
           queue.push({
             phase: 'rest',
-            title: step.name,
-            status: 'ОТДЫХ',
+            title: stepName,
+            status: I18n.t('statusRest'),
             duration: step.rest,
-            roundInfo: `Далее подход: ${s + 1} / ${step.sets}`,
-            speak: 'Отдых'
+            roundInfo: I18n.t('nextSet', { curr: s + 1, total: step.sets }),
+            speak: I18n.t('speakRest')
           });
         }
       }
@@ -174,11 +148,11 @@ export class TimerController {
       if (nextStep && step.afterRest > 0) {
         queue.push({
           phase: 'rest',
-          title: `Далее: ${nextStep.name}`,
-          status: 'СМЕНА УПРАЖНЕНИЯ',
+          title: I18n.t('nextPrefix', { name: nextStep.name }),
+          status: I18n.t('statusSwitch'),
           duration: step.afterRest,
-          roundInfo: `Упражнение ${stepIdx + 2} из ${steps.length}`,
-          speak: `Перерыв. Следующее упражнение: ${nextStep.name}`
+          roundInfo: I18n.t('nextStepInfo', { curr: stepIdx + 2, total: steps.length }),
+          speak: I18n.t('speakSwitch', { name: nextStep.name })
         });
       }
     });
@@ -188,22 +162,22 @@ export class TimerController {
 
   loadFreeMode() {
     this.stop();
-    this.activeWorkoutName = 'Свободный режим';
+    this.activeWorkoutName = I18n.t('freeMode');
     this.dom.quickSettings.hidden = false;
 
     const rounds = Math.max(1, parseInt(this.dom.roundsInput.value, 10) || 1);
     const work = Math.max(1, (parseInt(this.dom.workMin.value, 10) || 0) * 60 + (parseInt(this.dom.workSec.value, 10) || 0));
     const rest = Math.max(0, (parseInt(this.dom.restMin.value, 10) || 0) * 60 + (parseInt(this.dom.restSec.value, 10) || 0));
 
-    const freeSteps = new Array({
-      name: 'Свободный раунд',
+    const freeSteps = [{
+      name: I18n.t('freeRound'),
       sets: rounds,
       work,
       rest,
       afterRest: 0
-    });
+    }];
 
-    this.queue = this.#buildQueue('Свободный режим', freeSteps);
+    this.queue = this.#buildQueue(I18n.t('freeMode'), freeSteps);
     this.currentIndex = 0;
     this.secondsLeft = this.queue[0].duration;
     this.#renderIdle();
@@ -211,9 +185,9 @@ export class TimerController {
 
   loadWorkoutPlan(workout) {
     this.stop();
-    this.activeWorkoutName = workout.name;
+    this.activeWorkoutName = I18n.ex(workout.name);
     this.dom.quickSettings.hidden = true;
-    this.queue = this.#buildQueue(workout.name, workout.steps);
+    this.queue = this.#buildQueue(I18n.ex(workout.name), workout.steps);
     this.currentIndex = 0;
     this.secondsLeft = this.queue[0].duration;
     this.#renderIdle();
@@ -226,7 +200,7 @@ export class TimerController {
       clearInterval(this.intervalId);
       this.isRunning = false;
       this.#releaseWakeLock();
-      this.#setStartBtn('Продолжить', 'btn-start');
+      this.#setStartBtn(I18n.t('btnResume'), 'btn-start');
       return;
     }
 
@@ -245,7 +219,7 @@ export class TimerController {
 
     this.isRunning = true;
     this.#requestWakeLock();
-    this.#setStartBtn('Пауза', 'btn-pause');
+    this.#setStartBtn(I18n.t('btnPause'), 'btn-pause');
     this.#renderActive();
     this.intervalId = setInterval(() => this.#tick(), 1000);
   }
@@ -254,13 +228,13 @@ export class TimerController {
     clearInterval(this.intervalId);
     this.isRunning = false;
     this.#releaseWakeLock();
-    this.#setStartBtn('Старт', 'btn-start');
+    this.#setStartBtn(I18n.t('btnStart'), 'btn-start');
   }
 
   reset() {
     this.stop();
     this.currentIndex = 0;
-    this.secondsLeft = this.queue ? this.queue[0].duration : 0;
+    this.secondsLeft = this.queue.length > 0 ? this.queue[0].duration : 0;
     this.#renderIdle();
   }
 
@@ -278,9 +252,9 @@ export class TimerController {
       if (this.currentIndex >= this.queue.length) {
         this.stop();
         this.sound.play(soundType);
-        this.sound.speak('Тренировка окончена! Отличная работа!', this.dom.voiceCheck.checked);
+        this.sound.speak(I18n.t('speakDone'), this.dom.voiceCheck.checked);
         this.dom.display.className = 'display';
-        this.dom.statusText.textContent = 'ТРЕНИРОВКА ОКОНЧЕНА!';
+        this.dom.statusText.textContent = I18n.t('statusDone');
         this.dom.timeText.textContent = '00:00';
         this.dom.nextText.textContent = '';
         return;
@@ -309,10 +283,10 @@ export class TimerController {
     const first = this.queue[0];
     this.dom.display.className = 'display';
     this.dom.exerciseTitle.textContent = this.activeWorkoutName;
-    this.dom.statusText.textContent = 'ГОТОВ К СТАРТУ';
+    this.dom.statusText.textContent = I18n.t('statusReady');
     this.dom.timeText.textContent = this.#formatTime(first.duration);
     this.dom.roundText.textContent = first.roundInfo;
-    this.dom.nextText.textContent = this.queue[1] ? `Затем: ${this.queue[1].title}` : '';
+    this.dom.nextText.textContent = this.queue[1] ? I18n.t('thenPrefix', { name: this.queue[1].title }) : '';
   }
 
   #renderActive() {
@@ -324,9 +298,9 @@ export class TimerController {
     this.dom.statusText.textContent = seg.status;
     this.dom.timeText.textContent = this.#formatTime(this.secondsLeft);
     this.dom.roundText.textContent = seg.roundInfo;
-    this.dom.nextText.textContent = nextSeg ? `Далее: ${nextSeg.title} (${nextSeg.status.toLowerCase()})` : 'Финишный этап';
+    this.dom.nextText.textContent = nextSeg ? I18n.t('nextSegment', { title: nextSeg.title, status: nextSeg.status.toLowerCase() })
+    : I18n.t('finalStage');
   }
-
   async #requestWakeLock() {
     if ('wakeLock' in navigator) {
       try {
@@ -334,22 +308,19 @@ export class TimerController {
       } catch (_) {}
     }
   }
-
   #releaseWakeLock() {
     if (this.wakeLock) {
       this.wakeLock.release().catch(() => {});
       this.wakeLock = null;
     }
   }
-
   #setStartBtn(text, cls) {
     this.dom.startBtn.textContent = text;
     this.dom.startBtn.className = `btn ${cls}`;
-  }
-
+}
   #formatTime(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
     return `${m}:${s}`;
-    }
+}
 }

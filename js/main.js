@@ -4,6 +4,8 @@ import { WorkoutBuilder } from './builder.js';
 import { ScheduleManager } from './schedule.js';
 import { WorkoutStore } from './store.js';
 import { Platform } from './platform.js';
+import { I18n } from './i18n.js';
+import { DICT } from './dict.js';
 
 function switchTab(tabName) {
   document.querySelectorAll('.tab-btn').forEach((btn) => {
@@ -16,6 +18,8 @@ function switchTab(tabName) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   Platform.init();
+  I18n.setDict(DICT);
+  I18n.init();
 
   const sound = new SoundEngine();
   const timer = new TimerController(sound);
@@ -38,7 +42,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Подтягиваем данные из облака Telegram (если запущено в ТГ)
+  document.getElementById('langToggleBtn')?.addEventListener('click', () => {
+    I18n.toggle();
+    builder.renderExerciseOptions();
+    builder.renderDraftSteps();
+    builder.renderSavedWorkouts();
+    schedule.render();
+    timer.refreshTodayBanner();
+    if (!timer.isRunning) timer.loadFreeMode();
+  });
+
   const updatedFromCloud = await WorkoutStore.syncFromCloud();
   if (updatedFromCloud) {
     builder.renderExerciseOptions();
@@ -47,13 +60,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     timer.refreshTodayBanner();
   }
 
-  // Переключение вкладок
   document.getElementById('mainTabs').addEventListener('click', (e) => {
     const btn = e.target.closest('.tab-btn');
     if (btn) switchTab(btn.dataset.tab);
   });
 
-  // Регистрация Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }

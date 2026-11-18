@@ -1,4 +1,5 @@
 import { Platform } from "./platform.js";
+import { I18n } from './i18n.js';
 
 const DEFAULT_EXERCISES = [
   'Разминка',
@@ -278,7 +279,7 @@ export class WorkoutStore {
     }
 
     if (events.length === 0) {
-      alert('В графике пока нет ни одной запланированной тренировки.');
+      alert(I18n.t('alertNoWorkoutsCal'));
       return;
     }
 

@@ -1,3 +1,5 @@
+import { I18n } from './i18n.js';
+
 export class SoundEngine {
   constructor() {
     this.ctx = null;
@@ -17,7 +19,7 @@ export class SoundEngine {
     if (!enabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ru-RU';
+    utterance.lang = I18n.lang === 'ru' ? 'ru-RU' : 'en-US';
     utterance.rate = 1.05;
     window.speechSynthesis.speak(utterance);
   }

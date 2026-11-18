@@ -1,20 +1,21 @@
 'use strict';
 
 const CACHE_NAME = 'interval-timer-v9';
-const ASSETS = new Array(
+const ASSETS = [
   './',
   './index.html',
   './style.css',
   './manifest.json',
-  './icon.png',
   './js/main.js',
   './js/store.js',
   './js/sound.js',
   './js/timer.js',
   './js/builder.js',
   './js/schedule.js',
-  './js/platform.js'
-);
+  './js/platform.js',
+  './js/i18n.js',
+  './js/dict.js'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
